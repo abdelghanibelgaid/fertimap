@@ -1,0 +1,33 @@
+cff-version: 0.1.0
+message: "Please cite this software as follows."
+title: "fertimap"
+version: "0.1.0"
+doi: "10.5281/zenodo.19060239"
+date-released: "2026-03-17"
+type: "software"
+license: "MIT"
+repository-code: "https://github.com/abdelghanibelgaid/fertimap"
+url: "https://github.com/abdelghanibelgaid/fertimap"
+
+authors:
+  - family-names: "Belgaid"
+    given-names: "Abdelghani"
+    orcid: "https://orcid.org/0000-0002-1581-3958"
+  - family-names: "Mahmoud"
+    given-names: "Zakaria"
+    orcid: "https://orcid.org/0009-0004-6015-325X"
+
+preferred-citation:
+  type: "software"
+  authors:
+    - family-names: "Belgaid"
+      given-names: "Abdelghani"
+      orcid: "https://orcid.org/0000-0002-1581-3958"
+    - family-names: "Mahmoud"
+      given-names: "Zakaria"
+      orcid: "https://orcid.org/0009-0004-6015-325X"
+  title: "fertimap"
+  version: "0.1.0"
+  doi: "10.5281/zenodo.19060239"
+  date-released: "2026-03-17"
+  url: "https://doi.org/10.5281/zenodo.19060239"
