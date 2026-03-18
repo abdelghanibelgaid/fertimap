@@ -31,18 +31,18 @@ from fertimap.session import build_session
 from fertimap.utils import (
     apply_column_map,
     ensure_dataframe,
-    generate_rdt_levels,
+    generate_target_yield_levels,
     get_response_text,
     missing_to_none,
     normalize_culture_name,
     normalize_culture_names,
     validate_coordinates,
-    validate_rdt_levels,
+    validate_target_yield_levels,
     validate_target_yields,
 )
 
 
-class FertiMapClient:
+class FertimapClient:
     """Client for querying Fertimap fertilizer recommendations."""
 
     def __init__(
@@ -79,8 +79,8 @@ class FertiMapClient:
         self,
         longitude: object,
         latitude: object,
-        culture_name_en: object | None = None,
-        rdt_level: object | None = None,
+        crop_name: object | None = None,
+        target_yield_level: object | None = None,
         target_yield: object | None = None,
         ph: float | None = None,
         matiere_organique_pct: float | None = None,
@@ -91,16 +91,16 @@ class FertiMapClient:
 
         Parameters
         ----------
-        culture_name_en:
+        crop_name:
             One crop name, a list/tuple of crop names, or ``None`` for all crops.
-        rdt_level:
+        target_yield_level:
             One level, many levels, or a delimited string such as ``"low|high"``.
         target_yield:
             One custom numeric target yield or many values. Each value must be
-            within the selected crop's ``rdt_min`` and ``rdt_max`` range.
+            within the selected crop's ``target_yield_min`` and ``target_yield_max`` range.
         """
         lon, lat, site_context, culture_rules = self._fetch_site_payload(longitude, latitude)
-        selected_rules = self._select_culture_rules(culture_rules, culture_name_en)
+        selected_rules = self._select_culture_rules(culture_rules, crop_name)
         effective_ph = ph if ph is not None else site_context.ph
         effective_mo = (
             matiere_organique_pct
@@ -118,7 +118,7 @@ class FertiMapClient:
         for rule in selected_rules:
             target_requests = self._resolve_target_requests(
                 culture_rule=rule,
-                rdt_level=rdt_level,
+                target_yield_level=target_yield_level,
                 target_yield=target_yield,
             )
             for target_request in target_requests:
@@ -170,8 +170,8 @@ class FertiMapClient:
             result = self.get_recommendations(
                 longitude=missing_to_none(row["longitude"]),
                 latitude=missing_to_none(row["latitude"]),
-                culture_name_en=missing_to_none(row.get("culture_name_en")),
-                rdt_level=missing_to_none(row.get("rdt_level")),
+                crop_name=missing_to_none(row.get("crop_name")),
+                target_yield_level=missing_to_none(row.get("target_yield_level")),
                 target_yield=missing_to_none(row.get("target_yield")),
                 ph=missing_to_none(row.get("ph")),
                 matiere_organique_pct=missing_to_none(row.get("matiere_organique_pct")),
@@ -233,16 +233,16 @@ class FertiMapClient:
     def _select_culture_rules(
         self,
         culture_rules: dict[int, CultureRule],
-        culture_name_en: object | None,
+        crop_name: object | None,
     ) -> list[CultureRule]:
         """Return either all crop rules or the ones matching the requested names."""
-        requested_names = normalize_culture_names(culture_name_en)
+        requested_names = normalize_culture_names(crop_name)
         if requested_names is None:
             return list(culture_rules.values())
 
         available_by_name: dict[str, list[CultureRule]] = {}
         for rule in culture_rules.values():
-            normalized = normalize_culture_name(rule.culture_name_en)
+            normalized = normalize_culture_name(rule.crop_name)
             if normalized is not None:
                 available_by_name.setdefault(normalized, []).append(rule)
 
@@ -258,35 +258,39 @@ class FertiMapClient:
 
         if missing_names:
             available = sorted(
-                rule.culture_name_en for rule in culture_rules.values() if rule.culture_name_en
+                rule.crop_name for rule in culture_rules.values() if rule.crop_name
             )
             raise CultureNotFoundError(
-                f"Culture(s) {missing_names!r} not found. Available cultures: {available}"
+                f"Crop(s) {missing_names!r} not found. Available crops: {available}"
             )
         return selected
 
     def _resolve_target_requests(
         self,
         culture_rule: CultureRule,
-        rdt_level: object | None,
+        target_yield_level: object | None,
         target_yield: object | None,
     ) -> list[TargetRequest]:
-        """Resolve requested levels and/or custom targets for one crop."""
+        """Resolve requested target-yield levels and/or custom targets for one crop."""
         use_default_level = target_yield is None
-        requested_levels = validate_rdt_levels(
-            rdt_level,
+        requested_levels = validate_target_yield_levels(
+            target_yield_level,
             default_when_empty=use_default_level,
         )
         requested_custom_targets = validate_target_yields(target_yield)
         level_to_value = dict(
-            generate_rdt_levels(culture_rule.rdt_min, culture_rule.rdt_max, culture_rule.rdt_step)
+            generate_target_yield_levels(
+                culture_rule.target_yield_min,
+                culture_rule.target_yield_max,
+                culture_rule.target_yield_step,
+            )
         )
 
         target_requests: list[TargetRequest] = []
         for level in requested_levels:
             if level not in level_to_value:
                 raise UpstreamResponseError(
-                    f"RDT level {level!r} is not available for culture {culture_rule.culture_name_en!r}"
+                    f"target_yield_level {level!r} is not available for crop {culture_rule.crop_name!r}"
                 )
             target_requests.append(
                 TargetRequest(
@@ -321,14 +325,20 @@ class FertiMapClient:
         culture_rule: CultureRule,
     ) -> None:
         """Ensure a custom target yield is within Fertimap's allowed range."""
-        if culture_rule.rdt_min is None or culture_rule.rdt_max is None:
+        if (
+            culture_rule.target_yield_min is None
+            or culture_rule.target_yield_max is None
+        ):
             raise UpstreamResponseError(
-                f"The crop {culture_rule.culture_name_en!r} does not expose target-yield bounds."
+                f"The crop {culture_rule.crop_name!r} does not expose target-yield bounds."
             )
-        if target_yield < culture_rule.rdt_min or target_yield > culture_rule.rdt_max:
+        if (
+            target_yield < culture_rule.target_yield_min
+            or target_yield > culture_rule.target_yield_max
+        ):
             raise ValidationError(
                 f"target_yield={target_yield} is outside the allowed range for "
-                f"{culture_rule.culture_name_en!r}: [{culture_rule.rdt_min}, {culture_rule.rdt_max}]"
+                f"{culture_rule.crop_name!r}: [{culture_rule.target_yield_min}, {culture_rule.target_yield_max}]"
             )
 
     def _fetch_calculation(
@@ -371,21 +381,21 @@ class FertiMapClient:
             "matiere_organique_pct": matiere_organique_pct,
             "p_assimilable_mgkg_p2o5": p_assimilable_mgkg_p2o5,
             "k_mgkg_k2o": k_mgkg_k2o,
-            "slider_rdt_min": site_context.slider_rdt_min,
-            "slider_rdt_max": site_context.slider_rdt_max,
-            "slider_rdt_step": site_context.slider_rdt_step,
-            "slider_rdt_unit": site_context.slider_rdt_unit,
+            "slider_target_yield_min": site_context.slider_target_yield_min,
+            "slider_target_yield_max": site_context.slider_target_yield_max,
+            "slider_target_yield_step": site_context.slider_target_yield_step,
+            "slider_target_yield_unit": site_context.slider_target_yield_unit,
             "culture_id": culture_rule.culture_id,
             "culture_name_raw": culture_rule.culture_name_raw,
-            "culture_name_en": culture_rule.culture_name_en,
-            "rdt_level": target_request.request_label,
+            "crop_name": culture_rule.crop_name,
+            "target_yield_level": target_request.request_label,
             "target_yield_mode": target_request.request_mode,
             "target_yield": target_request.target_yield,
-            "rdt_min_culture": culture_rule.rdt_min,
-            "rdt_max_culture": culture_rule.rdt_max,
-            "rdt_step_culture": culture_rule.rdt_step,
-            "rdt_unit_culture": culture_rule.rdt_unit,
-            "rdt_used": target_request.target_yield,
+            "target_yield_min": culture_rule.target_yield_min,
+            "target_yield_max": culture_rule.target_yield_max,
+            "target_yield_step": culture_rule.target_yield_step,
+            "target_yield_unit": culture_rule.target_yield_unit,
+            "target_yield_value": target_request.target_yield,
             "N_kg_ha": rec["N_kg_ha"],
             "P_kg_ha": rec["P_kg_ha"],
             "K_kg_ha": rec["K_kg_ha"],

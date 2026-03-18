@@ -23,7 +23,7 @@ class DummyClient:
 
 @pytest.fixture()
 def patch_client(monkeypatch):
-    monkeypatch.setattr(cli, "FertiMapClient", lambda: DummyClient())
+    monkeypatch.setattr(cli, "FertimapClient", lambda: DummyClient())
 
 
 def test_cli_get_recommendations_json_stdout(monkeypatch, capsys, patch_client) -> None:
@@ -36,7 +36,7 @@ def test_cli_get_recommendations_json_stdout(monkeypatch, capsys, patch_client) 
             "-7.616",
             "--latitude",
             "33.589",
-            "--rdt-level",
+            "--target-yield-level",
             "low",
             "high",
         ],

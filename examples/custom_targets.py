@@ -1,13 +1,13 @@
 """Examples with multiple custom targets and soil overrides."""
 
-from fertimap import FertiMapClient
+from fertimap import FertimapClient
 
-client = FertiMapClient()
+client = FertimapClient()
 
 df = client.get_recommendations(
     longitude=-7.616,
     latitude=33.589,
-    culture_name_en="Wheat (Rainfed)",
+    crop_name="Wheat (Rainfed)",
     target_yield=[25, 35, 45],
     ph=7.8,
     matiere_organique_pct=1.9,
@@ -15,8 +15,8 @@ df = client.get_recommendations(
     k_mgkg_k2o=210,
 )
 
-print(df[["culture_name_en", "rdt_level", "target_yield", "target_yield_mode", "N_kg_ha", "P_kg_ha", "K_kg_ha"]])
+print(df[["crop_name", "target_yield_level", "target_yield", "target_yield_mode", "N_kg_ha", "P_kg_ha", "K_kg_ha"]])
 
 # Expected output placeholder:
-#      culture_name_en rdt_level  target_yield target_yield_mode  N_kg_ha  P_kg_ha  K_kg_ha
-# 0  Wheat (Rainfed)     custom          25.0            custom      ...      ...      ...
+#      crop_name target_yield_level  target_yield target_yield_mode  N_kg_ha  P_kg_ha  K_kg_ha
+# 0  Wheat (Rainfed)            custom          25.0            custom      ...      ...      ...

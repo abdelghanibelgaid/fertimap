@@ -6,7 +6,7 @@ import re
 
 from bs4 import BeautifulSoup
 
-from fertimap.constants import CULTURE_ID_TO_EN
+from fertimap.constants import CROP_ID
 from fertimap.models import CultureRule, SiteContext
 from fertimap.utils import maybe_fix_mojibake, to_float
 
@@ -73,11 +73,11 @@ def parse_geo_and_soil(html: str) -> SiteContext:
         matiere_organique_pct=to_float(mo_input.get("value") if mo_input else None),
         p_assimilable_mgkg_p2o5=to_float(p_input.get("value") if p_input else None),
         k_mgkg_k2o=to_float(k_input.get("value") if k_input else None),
-        slider_rdt_min=to_float(rdt_input.get("min") if rdt_input else None),
-        slider_rdt_max=to_float(rdt_input.get("max") if rdt_input else None),
-        slider_rdt_step=to_float(rdt_input.get("step") if rdt_input else None),
-        slider_rdt_default=to_float(rdt_input.get("value") if rdt_input else None),
-        slider_rdt_unit=(rdt_unit_output.get_text(strip=True) if rdt_unit_output else None),
+        slider_target_yield_min=to_float(rdt_input.get("min") if rdt_input else None),
+        slider_target_yield_max=to_float(rdt_input.get("max") if rdt_input else None),
+        slider_target_yield_step=to_float(rdt_input.get("step") if rdt_input else None),
+        slider_target_yield_default=to_float(rdt_input.get("value") if rdt_input else None),
+        slider_target_yield_unit=(rdt_unit_output.get_text(strip=True) if rdt_unit_output else None),
     )
 
 
@@ -100,16 +100,16 @@ def parse_culture_rules(html: str) -> dict[int, CultureRule]:
         if key == "culture":
             meta.culture_name_raw = value
         elif key == "min":
-            meta.rdt_min = to_float(value)
+            meta.target_yield_min = to_float(value)
         elif key == "max":
-            meta.rdt_max = to_float(value)
+            meta.target_yield_max = to_float(value)
         elif key == "step":
-            meta.rdt_step = to_float(value)
+            meta.target_yield_step = to_float(value)
         elif key == "unite":
-            meta.rdt_unit = value
+            meta.target_yield_unit = value
 
     for cid, meta in culture_rules.items():
-        meta.culture_name_en = CULTURE_ID_TO_EN.get(cid, meta.culture_name_raw)
+        meta.crop_name = CROP_ID.get(cid, meta.culture_name_raw)
 
     return culture_rules
 

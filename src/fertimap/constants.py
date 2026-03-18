@@ -8,17 +8,17 @@ CALCUL_URL = "http://www.fertimap.ma/php/calcul.php"
 DEFAULT_TIMEOUT = 15
 DEFAULT_SLEEP_SECONDS = 0.0
 DEFAULT_MAX_RETRIES = 3
-DEFAULT_RDT_LEVEL = "medium"
-DEFAULT_USER_AGENT = "fertimap/0.1.0"
+DEFAULT_TARGET_YIELD_LEVEL = "medium"
+DEFAULT_USER_AGENT = "fertimap/0.2.0"
 
-RDT_LEVELS = {"low", "medium", "high"}
+TARGET_YIELD_LEVELS = {"low", "medium", "high"}
 DEFAULT_MULTI_VALUE_SEPARATORS = ("|", ";")
 
 CANONICAL_INPUT_COLUMNS = (
     "longitude",
     "latitude",
-    "culture_name_en",
-    "rdt_level",
+    "crop_name",
+    "target_yield_level",
     "target_yield",
     "ph",
     "matiere_organique_pct",
@@ -26,8 +26,8 @@ CANONICAL_INPUT_COLUMNS = (
     "k_mgkg_k2o",
 )
 
-# English mapping for Fertimap culture identifiers.
-CULTURE_ID_TO_EN: dict[int, str] = {
+# Mapping Fertimap crop identifiers.
+CROP_ID: dict[int, str] = {
     1: "Wheat (Rainfed)",
     2: "Wheat (Irrigated)",
     3: "Barley (Rainfed)",

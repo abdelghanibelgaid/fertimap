@@ -1,9 +1,9 @@
 """Public package interface for FertiMap Library."""
 
-from fertimap.client import FertiMapClient
+from fertimap.client import FertimapClient
 from fertimap.exceptions import (
     CultureNotFoundError,
-    FertiMapError,
+    FertimapError,
     SiteDataNotFoundError,
     UpstreamResponseError,
     ValidationError,
@@ -12,8 +12,8 @@ from fertimap.utils import apply_column_map, ensure_dataframe
 
 __all__ = [
     "CultureNotFoundError",
-    "FertiMapClient",
-    "FertiMapError",
+    "FertimapClient",
+    "FertimapError",
     "SiteDataNotFoundError",
     "UpstreamResponseError",
     "ValidationError",

@@ -2,9 +2,9 @@
 
 import pandas as pd
 
-from fertimap import FertiMapClient
+from fertimap import FertimapClient
 
-client = FertiMapClient()
+client = FertimapClient()
 
 raw = pd.DataFrame(
     [
@@ -18,8 +18,8 @@ results = client.get_recommendations_batch(
     column_map={
         "longitude": "lon",
         "latitude": "lat",
-        "culture_name_en": "crop",
-        "rdt_level": "targets",
+        "crop_name": "crop",
+        "target_yield_level": "targets",
         # Or use target_yield instead when your CSV contains numeric custom targets.
         # "target_yield": "yield_values",
     },
@@ -28,5 +28,5 @@ results = client.get_recommendations_batch(
 print(results.head())
 
 # Expected output placeholder:
-#    input_row_index  longitude  latitude     culture_name_en rdt_level  ...
-# 0                0     -7.616    33.589  Wheat (Rainfed)        low  ...
+#    input_row_index  longitude  latitude     crop_name target_yield_level  ...
+# 0                0     -7.616    33.589  Wheat (Rainfed)             low  ...

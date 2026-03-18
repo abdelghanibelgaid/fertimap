@@ -21,11 +21,11 @@ class SiteContext:
     matiere_organique_pct: float | None = None
     p_assimilable_mgkg_p2o5: float | None = None
     k_mgkg_k2o: float | None = None
-    slider_rdt_min: float | None = None
-    slider_rdt_max: float | None = None
-    slider_rdt_step: float | None = None
-    slider_rdt_default: float | None = None
-    slider_rdt_unit: str | None = None
+    slider_target_yield_min: float | None = None
+    slider_target_yield_max: float | None = None
+    slider_target_yield_step: float | None = None
+    slider_target_yield_default: float | None = None
+    slider_target_yield_unit: str | None = None
 
 
 @dataclass(slots=True)
@@ -34,11 +34,11 @@ class CultureRule:
 
     culture_id: int
     culture_name_raw: str | None = None
-    culture_name_en: str | None = None
-    rdt_min: float | None = None
-    rdt_max: float | None = None
-    rdt_step: float | None = None
-    rdt_unit: str | None = None
+    crop_name: str | None = None
+    target_yield_min: float | None = None
+    target_yield_max: float | None = None
+    target_yield_step: float | None = None
+    target_yield_unit: str | None = None
 
 
 @dataclass(slots=True)

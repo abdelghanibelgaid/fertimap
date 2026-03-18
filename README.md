@@ -1,7 +1,7 @@
 <h1 align="center">fertimap</h1>
 
 <p align="center">
-  <strong>A Python client for site-specific NPK fertilizer recommendations from FertiMap.ma</strong>
+  <strong>A Python client for site-specific NPK fertilizer recommendations from [fertimap.ma](http://www.fertimap.ma/)</strong>
 </p>
 
 <p align="center">
@@ -21,7 +21,7 @@
 
   <!-- Security -->
   <a href="https://socket.dev/pypi/package/fertimap">
-    <img src="https://badge.socket.dev/pypi/package/fertimap/0.1.0?artifact_id=tar-gz#1764083045680" alt="Socket" />
+    <img src="https://badge.socket.dev/pypi/package/fertimap/0.2.0?artifact_id=tar-gz#1764083045680" alt="Socket" />
   </a>
 
   <!-- Downloads -->
@@ -39,7 +39,7 @@
 
 ## Why `fertimap`?
 
-`fertimap` is a production-friendly Python library that makes it easy to query **site-specific NPK fertilizer recommendations** from **FertiMap.ma** using only a field location, with optional agronomic overrides.
+`fertimap` is a production-friendly Python library that makes it easy to query **site-specific NPK fertilizer recommendations** from [**fertimap.ma**](http://www.fertimap.ma/) using only a field location, with optional agronomic overrides.
 
 It is designed for researchers, agronomists, and developers who want a reproducible way to move from:
 
@@ -65,8 +65,8 @@ With `fertimap`, you can:
   - one target-yield level or many target-yield levels
   - explicit numeric target yields
 - override selected field values when needed:
-  - `culture_name_en`
-  - `rdt_level`
+  - `crop_name`
+  - `target_yield_level`
   - `ph`
   - `matiere_organique_pct`
   - `p_assimilable_mgkg_p2o5`
@@ -95,24 +95,24 @@ pip install -e .[dev]
 ## Quick start
 
 ```python
-from fertimap import FertiMapClient
+from fertimap import FertimapClient
 
-client = FertiMapClient()
+client = FertimapClient()
 
 df = client.get_recommendations(
     longitude=-7.616,
     latitude=33.589,
-    culture_name_en="Wheat (Rainfed)",
-    rdt_level="medium",
+    crop_name="Wheat (Rainfed)",
+    target_yield_level="medium",
 )
 
-print(df[["culture_name_en", "rdt_level", "N_kg_ha", "P_kg_ha", "K_kg_ha"]])
+print(df[["crop_name", "target_yield_level", "N_kg_ha", "P_kg_ha", "K_kg_ha"]])
 ```
 
 **Expected output placeholder**
 
 ```text
-        culture_name_en rdt_level  N_kg_ha  P_kg_ha  K_kg_ha
+        crop_name target_yield_level  N_kg_ha  P_kg_ha  K_kg_ha
 0      Wheat (Rainfed)    medium    ...      ...      ...
 ```
 
@@ -127,9 +127,9 @@ The typical `fertimap` workflow is intentionally simple:
 You provide coordinates.
 
 ```python
-from fertimap import FertiMapClient
+from fertimap import FertimapClient
 
-client = FertiMapClient()
+client = FertimapClient()
 
 site = client.get_site_profile(
     longitude=-7.616,
@@ -170,13 +170,13 @@ crops = client.list_crops(
     latitude=33.589,
 )
 
-print(crops[["culture_id", "culture_name_en", "rdt_min", "rdt_max", "rdt_step", "rdt_unit"]])
+print(crops[["culture_id", "crop_name", "target_yield_min", "target_yield_max", "target_yield_step", "target_yield_unit"]])
 ```
 
 **Expected output placeholder**
 
 ```text
-   culture_id      culture_name_en        rdt_min  rdt_max  rdt_step rdt_unit
+   culture_id      crop_name        target_yield_min  target_yield_max  target_yield_step  target_yield_unit
 0          1      Wheat (Rainfed)          ...      ...      ...      ...
 1          2      Wheat (Irrigated)        ...      ...      ...      ...
 2          3      Barley (Rainfed)         ...      ...      ...      ...
@@ -202,8 +202,8 @@ You can request recommendations using:
 df = client.get_recommendations(
     longitude=-7.616,
     latitude=33.589,
-    culture_name_en="Wheat (Rainfed)",
-    rdt_level="medium",
+    crop_name="Wheat (Rainfed)",
+    target_yield_level="medium",
 )
 ```
 
@@ -213,8 +213,8 @@ df = client.get_recommendations(
 df = client.get_recommendations(
     longitude=-7.616,
     latitude=33.589,
-    culture_name_en="Wheat (Rainfed)",
-    rdt_level=["low", "medium", "high"],
+    crop_name="Wheat (Rainfed)",
+    target_yield_level=["low", "medium", "high"],
 )
 ```
 
@@ -224,7 +224,7 @@ df = client.get_recommendations(
 df = client.get_recommendations(
     longitude=-7.616,
     latitude=33.589,
-    culture_name_en="Wheat (Rainfed)",
+    crop_name="Wheat (Rainfed)",
     target_yield=45,
 )
 ```
@@ -235,7 +235,7 @@ df = client.get_recommendations(
 df = client.get_recommendations(
     longitude=-7.616,
     latitude=33.589,
-    culture_name_en="Wheat (Rainfed)",
+    crop_name="Wheat (Rainfed)",
     target_yield=[35, 45, 55],
 )
 ```
@@ -255,14 +255,14 @@ This step answers:
 df = client.get_recommendations(
     longitude=-7.616,
     latitude=33.589,
-    culture_name_en="Wheat (Rainfed)",
-    rdt_level="high",
+    crop_name="Wheat (Rainfed)",
+    target_yield_level="high",
 )
 
 print(df[[
-    "culture_name_en",
-    "rdt_level",
-    "rdt_used",
+    "crop_name",
+    "target_yield_level",
+    "target_yield_value",
     "N_kg_ha",
     "P_kg_ha",
     "K_kg_ha",
@@ -272,7 +272,7 @@ print(df[[
 **Expected output placeholder**
 
 ```text
-      culture_name_en rdt_level  rdt_used  N_kg_ha  P_kg_ha  K_kg_ha
+      crop_name target_yield_level  target_yield_value  N_kg_ha  P_kg_ha  K_kg_ha
 0    Wheat (Rainfed)      high      ...      ...      ...      ...
 ```
 
@@ -282,20 +282,20 @@ print(df[[
 df = client.get_recommendations(
     longitude=-7.616,
     latitude=33.589,
-    culture_name_en=["Wheat (Rainfed)", "Barley (Rainfed)"],
-    rdt_level="medium",
+    crop_name=["Wheat (Rainfed)", "Barley (Rainfed)"],
+    target_yield_level="medium",
 )
 ```
 
 ### All available crops for a site
 
-If `culture_name_en` is omitted, the client can return recommendations across the valid crop space for the requested target strategy.
+If `crop_name` is omitted, the client can return recommendations across the valid crop space for the requested target strategy.
 
 ```python
 df = client.get_recommendations(
     longitude=-7.616,
     latitude=33.589,
-    rdt_level="medium",
+    target_yield_level="medium",
 )
 ```
 
@@ -312,8 +312,8 @@ For scenario testing, controlled comparisons, or curated field data, you can ove
 df = client.get_recommendations(
     longitude=-7.616,
     latitude=33.589,
-    culture_name_en="Wheat (Rainfed)",
-    rdt_level="medium",
+    crop_name="Wheat (Rainfed)",
+    target_yield_level="medium",
     ph=7.8,
     matiere_organique_pct=1.9,
     p_assimilable_mgkg_p2o5=28,
@@ -337,22 +337,22 @@ This is useful when:
 
 ```python
 import pandas as pd
-from fertimap import FertiMapClient
+from fertimap import FertimapClient
 
-client = FertiMapClient()
+client = FertimapClient()
 
 sites = pd.DataFrame([
     {
         "longitude": -7.616,
         "latitude": 33.589,
-        "culture_name_en": "Wheat (Rainfed)",
-        "rdt_level": "medium",
+        "crop_name": "Wheat (Rainfed)",
+        "target_yield_level": "medium",
     },
     {
         "longitude": -6.832,
         "latitude": 33.972,
-        "culture_name_en": "Barley (Rainfed)",
-        "rdt_level": ["low", "high"],
+        "crop_name": "Barley (Rainfed)",
+        "target_yield_level": ["low", "high"],
         "matiere_organique_pct": 1.5,
         "p_assimilable_mgkg_p2o5": 20,
         "k_mgkg_k2o": 160,
@@ -373,8 +373,8 @@ prepared = client.prepare_input_table(
     column_map={
         "longitude": "lon",
         "latitude": "lat",
-        "culture_name_en": "crop",
-        "rdt_level": "target_level",
+        "crop_name": "crop",
+        "target_yield_level": "target_level",
     },
 )
 
@@ -391,19 +391,19 @@ This step answers:
 ## Main public interface
 
 ```python
-from fertimap import FertiMapClient
+from fertimap import FertimapClient
 ```
 
-### `FertiMapClient(...)`
+### `FertimapClient(...)`
 
 Create a client.
 
 ```python
-client = FertiMapClient(
+client = FertimapClient(
     timeout=20,
     sleep_seconds=0.2,
     max_retries=3,
-    user_agent="fertimap/0.1.0",
+    user_agent="fertimap/0.2.0",
 )
 ```
 
@@ -431,15 +431,15 @@ Get recommendations for one site.
 client.get_recommendations(
     longitude=-7.616,
     latitude=33.589,
-    culture_name_en="Wheat (Rainfed)",
-    rdt_level="medium",
+    crop_name="Wheat (Rainfed)",
+    target_yield_level="medium",
 )
 ```
 
 Supports:
 
 * one or more crops
-* one or more `rdt_level` values
+* one or more `target_yield_level` values
 * one or more `target_yield` values
 * optional overrides
 
@@ -471,8 +471,8 @@ The package installs a command-line tool named `fertimap`.
 fertimap recommend-site \
   --longitude -7.616 \
   --latitude 33.589 \
-  --culture-name-en "Wheat (Rainfed)" \
-  --rdt-level medium
+  --crop-name "Wheat (Rainfed)" \
+  --target-yield-level medium
 ```
 
 ## Multiple target levels
@@ -481,10 +481,10 @@ fertimap recommend-site \
 fertimap recommend-site \
   --longitude -7.616 \
   --latitude 33.589 \
-  --culture-name-en "Wheat (Rainfed)" \
-  --rdt-level low \
-  --rdt-level medium \
-  --rdt-level high
+  --crop-name "Wheat (Rainfed)" \
+  --target-yield-level low \
+  --target-yield-level medium \
+  --target-yield-level high
 ```
 
 ## Custom numeric target yield
@@ -493,7 +493,7 @@ fertimap recommend-site \
 fertimap recommend-site \
   --longitude -7.616 \
   --latitude 33.589 \
-  --culture-name-en "Wheat (Rainfed)" \
+  --crop-name "Wheat (Rainfed)" \
   --target-yield 45
 ```
 
@@ -527,20 +527,20 @@ Example:
 
 ```python
 from fertimap import (
-    FertiMapClient,
+    FertimapClient,
     ValidationError,
     CultureNotFoundError,
     SiteDataNotFoundError,
     UpstreamResponseError,
 )
 
-client = FertiMapClient()
+client = FertimapClient()
 
 try:
     df = client.get_recommendations(
         longitude=-7.616,
         latitude=33.589,
-        culture_name_en="Non Existing Crop",
+        crop_name="Non Existing Crop",
     )
 except ValidationError as e:
     print("Invalid input:", e)
@@ -600,7 +600,7 @@ If you use `fertimap` in research, software papers, reports, or operational pipe
   month        = mar,
   year         = 2026,
   publisher    = {GitHub},
-  version      = {0.1.0},
+  version      = {0.2.0},
   doi          = {10.5281/zenodo.19060239},
   url          = {https://doi.org/10.5281/zenodo.19060239},
 }
@@ -610,4 +610,4 @@ If you use `fertimap` in research, software papers, reports, or operational pipe
 
 # Acknowledgment
 
-This library builds on the valuable work of the **FertiMap.ma**, who developed and maintain the underlying platform and recommendation service. `fertimap` is an independent Python client created to make FertiMap.ma workflows more accessible for developers, researchers, and applied agronomy use cases. It does **not** claim ownership of the platform, its data, or its recommendation engine.
+This library builds on the valuable work of the [**fertimap.ma**](http://www.fertimap.ma/), who developed and maintain the underlying platform and recommendation service. `fertimap` is an independent Python client created to make [fertimap.ma](http://www.fertimap.ma/) workflows more accessible for developers, researchers, and applied agronomy use cases. It does **not** claim ownership of the platform, its data, or its recommendation engine.

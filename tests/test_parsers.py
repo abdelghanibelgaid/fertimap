@@ -27,7 +27,7 @@ def test_parse_geo_and_soil() -> None:
     assert parsed.latitude == 33.1
     assert parsed.region == "Test Region"
     assert parsed.soil_type == "Sandy"
-    assert parsed.slider_rdt_unit == "q/ha"
+    assert parsed.slider_target_yield_unit == "q/ha"
 
 
 def test_parse_culture_rules() -> None:
@@ -39,9 +39,9 @@ def test_parse_culture_rules() -> None:
     <input type="hidden" name="unite1" value="q/ha" />
     """
     rules = parse_culture_rules(html)
-    assert rules[1].culture_name_en == "Wheat (Rainfed)"
+    assert rules[1].crop_name == "Wheat (Rainfed)"
     assert rules[1].culture_name_raw == "Blé tendre"
-    assert rules[1].rdt_max == 50
+    assert rules[1].target_yield_max == 50
 
 
 def test_parse_calcul_response() -> None:

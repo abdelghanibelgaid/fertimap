@@ -10,7 +10,7 @@ sys.path.insert(0, str(SRC))
 import pandas as pd
 import pytest
 
-from fertimap.client import FertiMapClient
+from fertimap.client import FertimapClient
 from fertimap.constants import CALCUL_URL, DETAIL_URL
 
 DETAIL_HTML = """
@@ -97,15 +97,20 @@ def mock_session() -> MockSession:
 
 
 @pytest.fixture()
-def client(mock_session: MockSession) -> FertiMapClient:
-    return FertiMapClient(session=mock_session, sleep_seconds=0)
+def client(mock_session: MockSession) -> FertimapClient:
+    return FertimapClient(session=mock_session, sleep_seconds=0)
 
 
 @pytest.fixture()
 def batch_input() -> pd.DataFrame:
     return pd.DataFrame(
         [
-            {"longitude": -7.616, "latitude": 33.589, "culture_name_en": "Wheat (Rainfed)"},
-            {"longitude": -7.616, "latitude": 33.589, "culture_name_en": "Barley (Rainfed)", "rdt_level": "high"},
+            {"longitude": -7.616, "latitude": 33.589, "crop_name": "Wheat (Rainfed)"},
+            {
+                "longitude": -7.616,
+                "latitude": 33.589,
+                "crop_name": "Barley (Rainfed)",
+                "target_yield_level": "high",
+            },
         ]
     )

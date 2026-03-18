@@ -11,8 +11,8 @@ import pandas as pd
 from fertimap.constants import (
     CANONICAL_INPUT_COLUMNS,
     DEFAULT_MULTI_VALUE_SEPARATORS,
-    DEFAULT_RDT_LEVEL,
-    RDT_LEVELS,
+    DEFAULT_TARGET_YIELD_LEVEL,
+    TARGET_YIELD_LEVELS,
 )
 from fertimap.exceptions import ValidationError
 
@@ -118,19 +118,21 @@ def coerce_to_list(
     return [cleaned]
 
 
-def validate_rdt_levels(rdt_level: object, *, default_when_empty: bool = True) -> list[str]:
-    """Validate one or multiple RDT levels and return normalized values."""
+def validate_target_yield_levels(
+    target_yield_level: object, *, default_when_empty: bool = True
+) -> list[str]:
+    """Validate one or multiple target-yield levels and return normalized values."""
     levels = []
-    for item in coerce_to_list(rdt_level):
+    for item in coerce_to_list(target_yield_level):
         level = str(item).strip().lower()
-        if level not in RDT_LEVELS:
+        if level not in TARGET_YIELD_LEVELS:
             raise ValidationError(
-                f"rdt_level must contain only {sorted(RDT_LEVELS)}, got {rdt_level!r}"
+                f"target_yield_level must contain only {sorted(TARGET_YIELD_LEVELS)}, got {target_yield_level!r}"
             )
         levels.append(level)
 
     if not levels and default_when_empty:
-        levels = [DEFAULT_RDT_LEVEL]
+        levels = [DEFAULT_TARGET_YIELD_LEVEL]
 
     # Preserve order while removing duplicates.
     deduped: list[str] = []
@@ -178,22 +180,26 @@ def normalize_culture_names(value: object) -> list[str] | None:
     return deduped
 
 
-def generate_rdt_levels(
-    rdt_min: float | None,
-    rdt_max: float | None,
-    rdt_step: float | None,
+def generate_target_yield_levels(
+    target_yield_min: float | None,
+    target_yield_max: float | None,
+    target_yield_step: float | None,
 ) -> list[tuple[str, float]]:
     """Generate low/medium/high target yield values for a crop."""
-    if rdt_min is None or rdt_max is None:
+    if target_yield_min is None or target_yield_max is None:
         return []
 
-    step = rdt_step if rdt_step and rdt_step > 0 else (rdt_max - rdt_min) / 3.0
-    low = rdt_min
-    high = rdt_max
-    mid_raw = (rdt_min + rdt_max) / 2.0
-    n_steps = round((mid_raw - rdt_min) / step) if step else 0
-    mid = rdt_min + n_steps * step
-    mid = max(min(mid, rdt_max), rdt_min)
+    step = (
+        target_yield_step
+        if target_yield_step and target_yield_step > 0
+        else (target_yield_max - target_yield_min) / 3.0
+    )
+    low = target_yield_min
+    high = target_yield_max
+    mid_raw = (target_yield_min + target_yield_max) / 2.0
+    n_steps = round((mid_raw - target_yield_min) / step) if step else 0
+    mid = target_yield_min + n_steps * step
+    mid = max(min(mid, target_yield_max), target_yield_min)
 
     ordered_levels = [("low", low), ("medium", mid), ("high", high)]
     unique_levels: list[tuple[str, float]] = []

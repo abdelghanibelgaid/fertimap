@@ -21,8 +21,8 @@ def test_list_crops(client) -> None:
 def test_get_recommendations_for_all_crops(client) -> None:
     df = client.get_recommendations(-7.616, 33.589)
     assert len(df) == 2
-    assert set(df["culture_name_en"]) == {"Wheat (Rainfed)", "Barley (Rainfed)"}
-    assert set(df["rdt_level"]) == {"medium"}
+    assert set(df["crop_name"]) == {"Wheat (Rainfed)", "Barley (Rainfed)"}
+    assert set(df["target_yield_level"]) == {"medium"}
     assert set(df["N_kg_ha"]) == {120.0}
 
 
@@ -30,10 +30,10 @@ def test_get_recommendations_accepts_multiple_levels(client) -> None:
     df = client.get_recommendations(
         -7.616,
         33.589,
-        culture_name_en="Wheat (Rainfed)",
-        rdt_level=["high", "low", "medium"],
+        crop_name="Wheat (Rainfed)",
+        target_yield_level=["high", "low", "medium"],
     )
-    assert list(df["rdt_level"]) == ["high", "low", "medium"]
+    assert list(df["target_yield_level"]) == ["high", "low", "medium"]
     assert list(df["target_yield"]) == [50, 10, 30]
 
 
@@ -41,10 +41,10 @@ def test_get_recommendations_accepts_custom_targets(client) -> None:
     df = client.get_recommendations(
         -7.616,
         33.589,
-        culture_name_en="Wheat (Rainfed)",
+        crop_name="Wheat (Rainfed)",
         target_yield=[25, 35],
     )
-    assert list(df["rdt_level"]) == ["custom", "custom"]
+    assert list(df["target_yield_level"]) == ["custom", "custom"]
     assert list(df["target_yield_mode"]) == ["custom", "custom"]
     assert list(df["target_yield"]) == [25, 35]
 
@@ -54,7 +54,7 @@ def test_get_recommendations_rejects_out_of_range_custom_target(client) -> None:
         client.get_recommendations(
             -7.616,
             33.589,
-            culture_name_en="Wheat (Rainfed)",
+            crop_name="Wheat (Rainfed)",
             target_yield=55,
         )
 
@@ -63,27 +63,27 @@ def test_get_recommendations_for_single_crop_with_override(client) -> None:
     df = client.get_recommendations(
         -7.616,
         33.589,
-        culture_name_en="Wheat (Rainfed)",
-        rdt_level="high",
+        crop_name="Wheat (Rainfed)",
+        target_yield_level="high",
         p_assimilable_mgkg_p2o5=55,
     )
     assert len(df) == 1
     row = df.iloc[0]
-    assert row["culture_name_en"] == "Wheat (Rainfed)"
-    assert row["rdt_level"] == "high"
-    assert row["rdt_used"] == 50
+    assert row["crop_name"] == "Wheat (Rainfed)"
+    assert row["target_yield_level"] == "high"
+    assert row["target_yield_value"] == 50
     assert row["p_assimilable_mgkg_p2o5"] == 55
 
 
 def test_get_recommendations_rejects_unknown_crop(client) -> None:
     with pytest.raises(CultureNotFoundError):
-        client.get_recommendations(-7.616, 33.589, culture_name_en="Banana")
+        client.get_recommendations(-7.616, 33.589, crop_name="Banana")
 
 
 def test_get_recommendations_batch(client, batch_input) -> None:
     df = client.get_recommendations_batch(batch_input)
     assert len(df) == 2
-    assert list(df["rdt_level"]) == ["medium", "high"]
+    assert list(df["target_yield_level"]) == ["medium", "high"]
     assert list(df["input_row_index"]) == [0, 1]
 
 
@@ -103,12 +103,12 @@ def test_get_recommendations_batch_with_column_map(client) -> None:
         column_map={
             "longitude": "lon",
             "latitude": "lat",
-            "culture_name_en": "crop",
-            "rdt_level": "targets",
+            "crop_name": "crop",
+            "target_yield_level": "targets",
         },
     )
     assert len(df) == 2
-    assert list(df["rdt_level"]) == ["low", "high"]
+    assert list(df["target_yield_level"]) == ["low", "high"]
 
 
 def test_recommend_many_requires_coordinates(client) -> None:
@@ -117,6 +117,6 @@ def test_recommend_many_requires_coordinates(client) -> None:
 
 
 def test_backward_compatibility_aliases(client) -> None:
-    df = client.recommend_site(-7.616, 33.589, culture_name_en="Wheat (Rainfed)")
+    df = client.recommend_site(-7.616, 33.589, crop_name="Wheat (Rainfed)")
     assert len(df) == 1
     assert hasattr(client, "recommend_many")

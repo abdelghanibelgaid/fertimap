@@ -7,20 +7,20 @@ from fertimap.exceptions import ValidationError
 from fertimap.utils import (
     apply_column_map,
     coerce_to_list,
-    generate_rdt_levels,
+    generate_target_yield_levels,
     maybe_fix_mojibake,
-    validate_rdt_levels,
+    validate_target_yield_levels,
     validate_target_yields,
 )
 
 
-def test_generate_rdt_levels() -> None:
-    assert generate_rdt_levels(10, 50, 10) == [("low", 10), ("medium", 30), ("high", 50)]
+def test_generate_target_yield_levels() -> None:
+    assert generate_target_yield_levels(10, 50, 10) == [("low", 10), ("medium", 30), ("high", 50)]
 
 
-def test_validate_rdt_levels_accepts_many() -> None:
-    assert validate_rdt_levels(["low", "medium"]) == ["low", "medium"]
-    assert validate_rdt_levels("low|high") == ["low", "high"]
+def test_validate_target_yield_levels_accepts_many() -> None:
+    assert validate_target_yield_levels(["low", "medium"]) == ["low", "medium"]
+    assert validate_target_yield_levels("low|high") == ["low", "high"]
 
 
 def test_validate_target_yields() -> None:

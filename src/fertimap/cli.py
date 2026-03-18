@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from fertimap.client import FertiMapClient
+from fertimap.client import FertimapClient
 from fertimap.exceptions import ValidationError
 
 
@@ -38,12 +38,12 @@ def _build_parser() -> argparse.ArgumentParser:
     site_parser.add_argument("--longitude", required=True, type=float)
     site_parser.add_argument("--latitude", required=True, type=float)
     site_parser.add_argument(
-        "--culture-name-en",
+        "--crop-name",
         action="append",
         help="Crop name. Repeat the flag to request more than one crop.",
     )
     site_parser.add_argument(
-        "--rdt-level",
+        "--target-yield-level",
         nargs="+",
         default=None,
         help="One or many target-yield levels: low medium high",
@@ -101,14 +101,14 @@ def _write_output(dataframe: pd.DataFrame, output_path: str | None, stdout_forma
 def main() -> None:
     parser = _build_parser()
     args = parser.parse_args()
-    client = FertiMapClient()
+    client = FertimapClient()
 
     if args.command in {"get-recommendations", "recommend-site"}:
         df = client.get_recommendations(
             longitude=args.longitude,
             latitude=args.latitude,
-            culture_name_en=args.culture_name_en,
-            rdt_level=args.rdt_level,
+            crop_name=args.crop_name,
+            target_yield_level=args.target_yield_level,
             target_yield=args.target_yield,
             ph=args.ph,
             matiere_organique_pct=args.matiere_organique_pct,
