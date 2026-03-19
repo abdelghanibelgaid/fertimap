@@ -1,3 +1,35 @@
+Metadata-Version: 2.4
+Name: fertimap
+Version: 0.5.0
+Summary: FertiMap is a production-friendly Python client for querying site-specific NPK fertilizer recommendations from FertiMap.ma for Moroccan field locations.
+Author: Abdelghani Belgaid, Zakaria Mahmoud
+License-Expression: MIT
+Project-URL: Homepage, https://github.com/abdelghanibelgaid/fertimap
+Project-URL: Repository, https://github.com/abdelghanibelgaid/fertimap
+Project-URL: Issues, https://github.com/abdelghanibelgaid/fertimap/issues
+Keywords: agriculture,fertimap,fertilizer,site-specific,npk recommendations,morocco
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: Science/Research
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Topic :: Scientific/Engineering :: Information Analysis
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: beautifulsoup4>=4.12
+Requires-Dist: pandas>=1.5
+Requires-Dist: requests>=2.31
+Provides-Extra: dev
+Requires-Dist: build>=1.2; extra == "dev"
+Requires-Dist: pytest>=8.0; extra == "dev"
+Requires-Dist: pytest-cov>=5.0; extra == "dev"
+Dynamic: license-file
+
 <h1 align="center">fertimap</h1>
 
 <p align="center">
