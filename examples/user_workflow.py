@@ -16,10 +16,10 @@ print(profile)
 
 # Step 2: list all available crops and their target-yield ranges.
 crops = client.list_crops(-7.616, 33.589)
-print(crops[["culture_id", "crop_name", "target_yield_min", "target_yield_max", "target_yield_unit"]])
+print(crops[["crop_id", "crop_name", "target_yield_min", "target_yield_max", "target_yield_unit"]])
 
 # Expected output placeholder:
-#    culture_id     crop_name  target_yield_min  target_yield_max target_yield_unit
+#    crop_id     crop_name  target_yield_min  target_yield_max target_yield_unit
 # 0           1   Wheat (Rainfed)     ...      ...    qx/ha
 
 # Step 3: request recommendations for several levels at once.

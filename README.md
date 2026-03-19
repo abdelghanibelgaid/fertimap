@@ -21,7 +21,7 @@
 
   <!-- Security -->
   <a href="https://socket.dev/pypi/package/fertimap">
-    <img src="https://badge.socket.dev/pypi/package/fertimap/0.2.0?artifact_id=tar-gz#1764083045680" alt="Socket" />
+    <img src="https://badge.socket.dev/pypi/package/fertimap/0.3.0?artifact_id=tar-gz#1764083045680" alt="Socket" />
   </a>
 
   <!-- Downloads -->
@@ -170,13 +170,13 @@ crops = client.list_crops(
     latitude=33.589,
 )
 
-print(crops[["culture_id", "crop_name", "target_yield_min", "target_yield_max", "target_yield_step", "target_yield_unit"]])
+print(crops[["crop_id", "crop_name", "target_yield_min", "target_yield_max", "target_yield_step", "target_yield_unit"]])
 ```
 
 **Expected output placeholder**
 
 ```text
-   culture_id      crop_name        target_yield_min  target_yield_max  target_yield_step  target_yield_unit
+   crop_id      crop_name        target_yield_min  target_yield_max  target_yield_step  target_yield_unit
 0          1      Wheat (Rainfed)          ...      ...      ...      ...
 1          2      Wheat (Irrigated)        ...      ...      ...      ...
 2          3      Barley (Rainfed)         ...      ...      ...      ...
@@ -403,7 +403,7 @@ client = FertimapClient(
     timeout=20,
     sleep_seconds=0.2,
     max_retries=3,
-    user_agent="fertimap/0.2.0",
+    user_agent="fertimap/0.3.0",
 )
 ```
 
@@ -519,7 +519,7 @@ The library validates:
 Typical exceptions include:
 
 * `ValidationError`
-* `CultureNotFoundError`
+* `CropNotFoundError`
 * `SiteDataNotFoundError`
 * `UpstreamResponseError`
 
@@ -529,7 +529,7 @@ Example:
 from fertimap import (
     FertimapClient,
     ValidationError,
-    CultureNotFoundError,
+    CropNotFoundError,
     SiteDataNotFoundError,
     UpstreamResponseError,
 )
@@ -544,7 +544,7 @@ try:
     )
 except ValidationError as e:
     print("Invalid input:", e)
-except CultureNotFoundError as e:
+except CropNotFoundError as e:
     print("Crop not found:", e)
 except SiteDataNotFoundError as e:
     print("No site data found:", e)
@@ -600,7 +600,7 @@ If you use `fertimap` in research, software papers, reports, or operational pipe
   month        = mar,
   year         = 2026,
   publisher    = {GitHub},
-  version      = {0.2.0},
+  version      = {0.1.0},
   doi          = {10.5281/zenodo.19060239},
   url          = {https://doi.org/10.5281/zenodo.19060239},
 }

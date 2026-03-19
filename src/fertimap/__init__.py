@@ -2,7 +2,7 @@
 
 from fertimap.client import FertimapClient
 from fertimap.exceptions import (
-    CultureNotFoundError,
+    CropNotFoundError,
     FertimapError,
     SiteDataNotFoundError,
     UpstreamResponseError,
@@ -11,7 +11,7 @@ from fertimap.exceptions import (
 from fertimap.utils import apply_column_map, ensure_dataframe
 
 __all__ = [
-    "CultureNotFoundError",
+    "CropNotFoundError",
     "FertimapClient",
     "FertimapError",
     "SiteDataNotFoundError",
@@ -21,4 +21,4 @@ __all__ = [
     "ensure_dataframe",
 ]
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"

@@ -16,15 +16,15 @@ from fertimap.constants import (
     DETAIL_URL,
 )
 from fertimap.exceptions import (
-    CultureNotFoundError,
+    CropNotFoundError,
     SiteDataNotFoundError,
     UpstreamResponseError,
     ValidationError,
 )
-from fertimap.models import CultureRule, SiteContext, TargetRequest
+from fertimap.models import CropRule, SiteContext, TargetRequest
 from fertimap.parsers import (
     parse_calcul_response,
-    parse_culture_rules,
+    parse_crop_rules,
     parse_geo_and_soil,
 )
 from fertimap.session import build_session
@@ -34,8 +34,8 @@ from fertimap.utils import (
     generate_target_yield_levels,
     get_response_text,
     missing_to_none,
-    normalize_culture_name,
-    normalize_culture_names,
+    normalize_crop_name,
+    normalize_crop_names,
     validate_coordinates,
     validate_target_yield_levels,
     validate_target_yields,
@@ -72,7 +72,7 @@ class FertimapClient:
         if not rules:
             raise UpstreamResponseError("No crop rules found in Fertimap detail response")
         return pd.DataFrame([asdict(rule) for rule in rules.values()]).sort_values(
-            by="culture_id"
+            by="crop_id"
         )
 
     def get_recommendations(
@@ -99,8 +99,8 @@ class FertimapClient:
             One custom numeric target yield or many values. Each value must be
             within the selected crop's ``target_yield_min`` and ``target_yield_max`` range.
         """
-        lon, lat, site_context, culture_rules = self._fetch_site_payload(longitude, latitude)
-        selected_rules = self._select_culture_rules(culture_rules, crop_name)
+        lon, lat, site_context, crop_rules = self._fetch_site_payload(longitude, latitude)
+        selected_rules = self._select_crop_rules(crop_rules, crop_name)
         effective_ph = ph if ph is not None else site_context.ph
         effective_mo = (
             matiere_organique_pct
@@ -117,7 +117,7 @@ class FertimapClient:
         recommendation_rows: list[dict] = []
         for rule in selected_rules:
             target_requests = self._resolve_target_requests(
-                culture_rule=rule,
+                crop_rule=rule,
                 target_yield_level=target_yield_level,
                 target_yield=target_yield,
             )
@@ -126,7 +126,7 @@ class FertimapClient:
                     longitude=lon,
                     latitude=lat,
                     site_context=site_context,
-                    culture_rule=rule,
+                    crop_rule=rule,
                     target_request=target_request,
                     ph=effective_ph,
                     matiere_organique_pct=effective_mo,
@@ -191,7 +191,7 @@ class FertimapClient:
     def get_site_context(self, longitude: object, latitude: object) -> SiteContext:
         return self.get_site_profile(longitude, latitude)
 
-    def list_available_cultures(self, longitude: object, latitude: object) -> pd.DataFrame:
+    def list_available_crops(self, longitude: object, latitude: object) -> pd.DataFrame:
         return self.list_crops(longitude, latitude)
 
     def recommend_site(self, *args, **kwargs) -> pd.DataFrame:
@@ -207,7 +207,7 @@ class FertimapClient:
         self,
         longitude: object,
         latitude: object,
-    ) -> tuple[float, float, SiteContext, dict[int, CultureRule]]:
+    ) -> tuple[float, float, SiteContext, dict[int, CropRule]]:
         """Fetch detail HTML once and parse both site and crop metadata."""
         lon, lat = validate_coordinates(longitude, latitude)
         response = self.session.get(
@@ -219,37 +219,37 @@ class FertimapClient:
         html = get_response_text(response)
 
         site_context = parse_geo_and_soil(html)
-        culture_rules = parse_culture_rules(html)
+        crop_rules = parse_crop_rules(html)
         if site_context.id_province is None and site_context.soil_type is None and site_context.ph is None:
             raise SiteDataNotFoundError(
                 f"No usable site data found for longitude={lon}, latitude={lat}"
             )
-        if not culture_rules:
+        if not crop_rules:
             raise SiteDataNotFoundError(
                 f"No crop rules found for longitude={lon}, latitude={lat}"
             )
-        return lon, lat, site_context, culture_rules
+        return lon, lat, site_context, crop_rules
 
-    def _select_culture_rules(
+    def _select_crop_rules(
         self,
-        culture_rules: dict[int, CultureRule],
+        crop_rules: dict[int, CropRule],
         crop_name: object | None,
-    ) -> list[CultureRule]:
+    ) -> list[CropRule]:
         """Return either all crop rules or the ones matching the requested names."""
-        requested_names = normalize_culture_names(crop_name)
+        requested_names = normalize_crop_names(crop_name)
         if requested_names is None:
-            return list(culture_rules.values())
+            return list(crop_rules.values())
 
-        available_by_name: dict[str, list[CultureRule]] = {}
-        for rule in culture_rules.values():
-            normalized = normalize_culture_name(rule.crop_name)
+        available_by_name: dict[str, list[CropRule]] = {}
+        for rule in crop_rules.values():
+            normalized = normalize_crop_name(rule.crop_name)
             if normalized is not None:
                 available_by_name.setdefault(normalized, []).append(rule)
 
-        selected: list[CultureRule] = []
+        selected: list[CropRule] = []
         missing_names: list[str] = []
         for requested_name in requested_names:
-            key = normalize_culture_name(requested_name)
+            key = normalize_crop_name(requested_name)
             matches = available_by_name.get(key or "", [])
             if not matches:
                 missing_names.append(requested_name)
@@ -258,16 +258,16 @@ class FertimapClient:
 
         if missing_names:
             available = sorted(
-                rule.crop_name for rule in culture_rules.values() if rule.crop_name
+                rule.crop_name for rule in crop_rules.values() if rule.crop_name
             )
-            raise CultureNotFoundError(
+            raise CropNotFoundError(
                 f"Crop(s) {missing_names!r} not found. Available crops: {available}"
             )
         return selected
 
     def _resolve_target_requests(
         self,
-        culture_rule: CultureRule,
+        crop_rule: CropRule,
         target_yield_level: object | None,
         target_yield: object | None,
     ) -> list[TargetRequest]:
@@ -280,9 +280,9 @@ class FertimapClient:
         requested_custom_targets = validate_target_yields(target_yield)
         level_to_value = dict(
             generate_target_yield_levels(
-                culture_rule.target_yield_min,
-                culture_rule.target_yield_max,
-                culture_rule.target_yield_step,
+                crop_rule.target_yield_min,
+                crop_rule.target_yield_max,
+                crop_rule.target_yield_step,
             )
         )
 
@@ -290,7 +290,7 @@ class FertimapClient:
         for level in requested_levels:
             if level not in level_to_value:
                 raise UpstreamResponseError(
-                    f"target_yield_level {level!r} is not available for crop {culture_rule.crop_name!r}"
+                    f"target_yield_level {level!r} is not available for crop {crop_rule.crop_name!r}"
                 )
             target_requests.append(
                 TargetRequest(
@@ -301,7 +301,7 @@ class FertimapClient:
             )
 
         for custom_value in requested_custom_targets:
-            self._validate_custom_target_within_rule(custom_value, culture_rule)
+            self._validate_custom_target_within_rule(custom_value, crop_rule)
             target_requests.append(
                 TargetRequest(
                     request_label="custom",
@@ -322,23 +322,23 @@ class FertimapClient:
     def _validate_custom_target_within_rule(
         self,
         target_yield: float,
-        culture_rule: CultureRule,
+        crop_rule: CropRule,
     ) -> None:
         """Ensure a custom target yield is within Fertimap's allowed range."""
         if (
-            culture_rule.target_yield_min is None
-            or culture_rule.target_yield_max is None
+            crop_rule.target_yield_min is None
+            or crop_rule.target_yield_max is None
         ):
             raise UpstreamResponseError(
-                f"The crop {culture_rule.crop_name!r} does not expose target-yield bounds."
+                f"The crop {crop_rule.crop_name!r} does not expose target-yield bounds."
             )
         if (
-            target_yield < culture_rule.target_yield_min
-            or target_yield > culture_rule.target_yield_max
+            target_yield < crop_rule.target_yield_min
+            or target_yield > crop_rule.target_yield_max
         ):
             raise ValidationError(
                 f"target_yield={target_yield} is outside the allowed range for "
-                f"{culture_rule.crop_name!r}: [{culture_rule.target_yield_min}, {culture_rule.target_yield_max}]"
+                f"{crop_rule.crop_name!r}: [{crop_rule.target_yield_min}, {crop_rule.target_yield_max}]"
             )
 
     def _fetch_calculation(
@@ -346,7 +346,7 @@ class FertimapClient:
         longitude: float,
         latitude: float,
         site_context: SiteContext,
-        culture_rule: CultureRule,
+        crop_rule: CropRule,
         target_request: TargetRequest,
         ph: float | None,
         matiere_organique_pct: float | None,
@@ -356,7 +356,7 @@ class FertimapClient:
         """Call Fertimap calculator endpoint and compose one output row."""
         params = {
             "id_province": site_context.id_province,
-            "culture": culture_rule.culture_id,
+            "crop": crop_rule.crop_id,
             "mo": matiere_organique_pct,
             "p": p_assimilable_mgkg_p2o5,
             "k": k_mgkg_k2o,
@@ -385,16 +385,16 @@ class FertimapClient:
             "slider_target_yield_max": site_context.slider_target_yield_max,
             "slider_target_yield_step": site_context.slider_target_yield_step,
             "slider_target_yield_unit": site_context.slider_target_yield_unit,
-            "culture_id": culture_rule.culture_id,
-            "culture_name_raw": culture_rule.culture_name_raw,
-            "crop_name": culture_rule.crop_name,
+            "crop_id": crop_rule.crop_id,
+            "crop_name_raw": crop_rule.crop_name_raw,
+            "crop_name": crop_rule.crop_name,
             "target_yield_level": target_request.request_label,
             "target_yield_mode": target_request.request_mode,
             "target_yield": target_request.target_yield,
-            "target_yield_min": culture_rule.target_yield_min,
-            "target_yield_max": culture_rule.target_yield_max,
-            "target_yield_step": culture_rule.target_yield_step,
-            "target_yield_unit": culture_rule.target_yield_unit,
+            "target_yield_min": crop_rule.target_yield_min,
+            "target_yield_max": crop_rule.target_yield_max,
+            "target_yield_step": crop_rule.target_yield_step,
+            "target_yield_unit": crop_rule.target_yield_unit,
             "target_yield_value": target_request.target_yield,
             "N_kg_ha": rec["N_kg_ha"],
             "P_kg_ha": rec["P_kg_ha"],

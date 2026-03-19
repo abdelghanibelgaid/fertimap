@@ -29,11 +29,11 @@ class SiteContext:
 
 
 @dataclass(slots=True)
-class CultureRule:
+class CropRule:
     """RDT slider metadata for one Fertimap crop."""
 
-    culture_id: int
-    culture_name_raw: str | None = None
+    crop_id: int
+    crop_name_raw: str | None = None
     crop_name: str | None = None
     target_yield_min: float | None = None
     target_yield_max: float | None = None

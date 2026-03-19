@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from fertimap.parsers import parse_calcul_response, parse_culture_rules, parse_geo_and_soil
+from fertimap.parsers import parse_calcul_response, parse_crop_rules, parse_geo_and_soil
 
 
 def test_parse_geo_and_soil() -> None:
@@ -30,7 +30,7 @@ def test_parse_geo_and_soil() -> None:
     assert parsed.slider_target_yield_unit == "q/ha"
 
 
-def test_parse_culture_rules() -> None:
+def test_parse_crop_rules() -> None:
     html = """
     <input type="hidden" name="culture1" value="Blé tendre" />
     <input type="hidden" name="min1" value="10" />
@@ -38,9 +38,9 @@ def test_parse_culture_rules() -> None:
     <input type="hidden" name="step1" value="10" />
     <input type="hidden" name="unite1" value="q/ha" />
     """
-    rules = parse_culture_rules(html)
+    rules = parse_crop_rules(html)
     assert rules[1].crop_name == "Wheat (Rainfed)"
-    assert rules[1].culture_name_raw == "Blé tendre"
+    assert rules[1].crop_name_raw == "Blé tendre"
     assert rules[1].target_yield_max == 50
 
 

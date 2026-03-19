@@ -70,7 +70,7 @@ def get_response_text(response: object) -> str:
     return maybe_fix_mojibake(str(getattr(response, "text", "")))
 
 
-def normalize_culture_name(value: str | None) -> str | None:
+def normalize_crop_name(value: str | None) -> str | None:
     """Normalize a crop name for case-insensitive matching."""
     cleaned = missing_to_none(value)
     if cleaned is None:
@@ -165,7 +165,7 @@ def validate_target_yields(target_yield: object) -> list[float]:
     return deduped
 
 
-def normalize_culture_names(value: object) -> list[str] | None:
+def normalize_crop_names(value: object) -> list[str] | None:
     """Normalize one or multiple crop names while preserving order."""
     names = [str(item).strip() for item in coerce_to_list(value) if str(item).strip()]
     if not names:
@@ -173,7 +173,7 @@ def normalize_culture_names(value: object) -> list[str] | None:
     deduped: list[str] = []
     seen: set[str] = set()
     for name in names:
-        key = normalize_culture_name(name)
+        key = normalize_crop_name(name)
         if key and key not in seen:
             seen.add(key)
             deduped.append(name)

@@ -15,7 +15,7 @@ class SiteDataNotFoundError(FertimapError):
     """Raised when Fertimap returns no usable site information."""
 
 
-class CultureNotFoundError(FertimapError):
+class CropNotFoundError(FertimapError):
     """Raised when a requested crop is not available at a site."""
 
 

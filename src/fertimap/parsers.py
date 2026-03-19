@@ -7,7 +7,7 @@ import re
 from bs4 import BeautifulSoup
 
 from fertimap.constants import CROP_ID
-from fertimap.models import CultureRule, SiteContext
+from fertimap.models import CropRule, SiteContext
 from fertimap.utils import maybe_fix_mojibake, to_float
 
 
@@ -81,24 +81,24 @@ def parse_geo_and_soil(html: str) -> SiteContext:
     )
 
 
-def parse_culture_rules(html: str) -> dict[int, CultureRule]:
+def parse_crop_rules(html: str) -> dict[int, CropRule]:
     """Parse all crop slider rules available for the current site."""
     soup = BeautifulSoup(maybe_fix_mojibake(html), "html.parser")
-    culture_rules: dict[int, CultureRule] = {}
+    crop_rules: dict[int, CropRule] = {}
 
     for inp in soup.find_all("input", {"type": "hidden"}):
         name = (inp.get("name") or "").strip()
         value = maybe_fix_mojibake(inp.get("value", "").strip())
-        match = re.match(r"(culture|min|max|step|unite)(\d+)$", name)
+        match = re.match(r"(crop|min|max|step|unite)(\d+)$", name)
         if not match:
             continue
 
         key, cid_str = match.groups()
         cid = int(cid_str)
-        meta = culture_rules.setdefault(cid, CultureRule(culture_id=cid))
+        meta = crop_rules.setdefault(cid, CropRule(crop_id=cid))
 
-        if key == "culture":
-            meta.culture_name_raw = value
+        if key == "crop":
+            meta.crop_name_raw = value
         elif key == "min":
             meta.target_yield_min = to_float(value)
         elif key == "max":
@@ -108,10 +108,10 @@ def parse_culture_rules(html: str) -> dict[int, CultureRule]:
         elif key == "unite":
             meta.target_yield_unit = value
 
-    for cid, meta in culture_rules.items():
-        meta.crop_name = CROP_ID.get(cid, meta.culture_name_raw)
+    for cid, meta in crop_rules.items():
+        meta.crop_name = CROP_ID.get(cid, meta.crop_name_raw)
 
-    return culture_rules
+    return crop_rules
 
 
 def parse_calcul_response(html: str) -> dict[str, float | None]:

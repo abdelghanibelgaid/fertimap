@@ -3,7 +3,7 @@ from __future__ import annotations
 import pandas as pd
 import pytest
 
-from fertimap.exceptions import CultureNotFoundError, ValidationError
+from fertimap.exceptions import CropNotFoundError, ValidationError
 
 
 def test_get_site_profile(client) -> None:
@@ -14,8 +14,8 @@ def test_get_site_profile(client) -> None:
 
 def test_list_crops(client) -> None:
     df = client.list_crops(-7.616, 33.589)
-    assert list(df["culture_id"]) == [1, 3]
-    assert df.loc[df["culture_id"] == 1, "culture_name_raw"].iloc[0] == "Blé tendre"
+    assert list(df["crop_id"]) == [1, 3]
+    assert df.loc[df["crop_id"] == 1, "crop_name_raw"].iloc[0] == "Blé tendre"
 
 
 def test_get_recommendations_for_all_crops(client) -> None:
@@ -76,7 +76,7 @@ def test_get_recommendations_for_single_crop_with_override(client) -> None:
 
 
 def test_get_recommendations_rejects_unknown_crop(client) -> None:
-    with pytest.raises(CultureNotFoundError):
+    with pytest.raises(CropNotFoundError):
         client.get_recommendations(-7.616, 33.589, crop_name="Banana")
 
 
