@@ -89,7 +89,7 @@ def parse_crop_rules(html: str) -> dict[int, CropRule]:
     for inp in soup.find_all("input", {"type": "hidden"}):
         name = (inp.get("name") or "").strip()
         value = maybe_fix_mojibake(inp.get("value", "").strip())
-        match = re.match(r"(crop|min|max|step|unite)(\d+)$", name)
+        match = re.match(r"(culture|min|max|step|unite)(\d+)$", name)
         if not match:
             continue
 
@@ -97,7 +97,7 @@ def parse_crop_rules(html: str) -> dict[int, CropRule]:
         cid = int(cid_str)
         meta = crop_rules.setdefault(cid, CropRule(crop_id=cid))
 
-        if key == "crop":
+        if key == "culture":
             meta.crop_name_raw = value
         elif key == "min":
             meta.target_yield_min = to_float(value)
@@ -134,5 +134,5 @@ def parse_calcul_response(html: str) -> dict[str, float | None]:
             p_kg_ha = value
         elif "kg k/ha" in label:
             k_kg_ha = value
-
+    
     return {"N_kg_ha": n_kg_ha, "P_kg_ha": p_kg_ha, "K_kg_ha": k_kg_ha}

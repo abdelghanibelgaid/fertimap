@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "fertimap"
-version = "0.3.0"
+version = "0.4.0"
 description = "FertiMap is a production-friendly Python client for querying site-specific NPK fertilizer recommendations from FertiMap.ma for Moroccan field locations."
 readme = "README.md"
 requires-python = ">=3.9"

@@ -356,7 +356,7 @@ class FertimapClient:
         """Call Fertimap calculator endpoint and compose one output row."""
         params = {
             "id_province": site_context.id_province,
-            "crop": crop_rule.crop_id,
+            "culture": crop_rule.crop_id,
             "mo": matiere_organique_pct,
             "p": p_assimilable_mgkg_p2o5,
             "k": k_mgkg_k2o,
