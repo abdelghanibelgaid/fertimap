@@ -368,6 +368,13 @@ class FertimapClient:
         response.raise_for_status()
         rec = parse_calcul_response(get_response_text(response))
 
+        if rec["N_kg_ha"] is None and rec["P_kg_ha"] is None and rec["K_kg_ha"] is None:
+            raise UpstreamResponseError(
+                f"Could not parse NPK recommendation from Fertimap calculator response "
+                f"for crop_id={crop_rule.crop_id}, target_yield={target_request.target_yield}, "
+                f"longitude={longitude}, latitude={latitude}."
+            )
+
         return {
             "longitude": longitude,
             "latitude": latitude,

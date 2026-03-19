@@ -21,7 +21,7 @@
 
   <!-- Security -->
   <a href="https://socket.dev/pypi/package/fertimap">
-    <img src="https://badge.socket.dev/pypi/package/fertimap/0.4.0?artifact_id=tar-gz#1764083045680" alt="Socket" />
+    <img src="https://badge.socket.dev/pypi/package/fertimap/0.4.1?artifact_id=tar-gz#1764083045680" alt="Socket" />
   </a>
 
   <!-- Downloads -->
@@ -403,7 +403,7 @@ client = FertimapClient(
     timeout=20,
     sleep_seconds=0.2,
     max_retries=3,
-    user_agent="fertimap/0.4.0",
+    user_agent="fertimap/0.4.1",
 )
 ```
 

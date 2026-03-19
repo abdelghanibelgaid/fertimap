@@ -115,24 +115,68 @@ def parse_crop_rules(html: str) -> dict[int, CropRule]:
 
 
 def parse_calcul_response(html: str) -> dict[str, float | None]:
-    """Parse calculator HTML and return only N, P, K recommendation values."""
+    """Parse calculator HTML and return N, P, K recommendation values."""
     soup = BeautifulSoup(maybe_fix_mojibake(html), "html.parser")
 
-    n_kg_ha = p_kg_ha = k_kg_ha = None
+    n_kg_ha = None
+    p_kg_ha = None
+    k_kg_ha = None
 
     for row in soup.find_all("tr"):
         th = row.find("th")
-        td = row.find("td")
-        if not th or not td:
-            continue
-        label = " ".join(th.stripped_strings).lower()
-        value = to_float(td.get_text(strip=True))
+        tds = row.find_all("td")
 
-        if "kg n/ha" in label:
+        if th is not None and tds:
+            label = " ".join(th.stripped_strings).strip().lower()
+            value_text = tds[-1].get_text(" ", strip=True)
+        elif len(tds) >= 2:
+            label = tds[0].get_text(" ", strip=True).strip().lower()
+            value_text = tds[-1].get_text(" ", strip=True)
+        else:
+            continue
+
+        label = maybe_fix_mojibake(label)
+        value = to_float(value_text)
+
+        if value is None:
+            continue
+
+        # Nitrogen
+        if (
+            "kg n/ha" in label
+            or re.search(r"\bn\b", label)
+            or "azote" in label
+        ):
             n_kg_ha = value
-        elif "kg p/ha" in label:
+            continue
+
+        # Phosphorus / P2O5
+        if (
+            "kg p/ha" in label
+            or "kg p2o5/ha" in label
+            or "p2o5" in label
+            or "phosph" in label
+        ):
             p_kg_ha = value
-        elif "kg k/ha" in label:
+            continue
+
+        # Potassium / K2O
+        if (
+            "kg k/ha" in label
+            or "kg k2o/ha" in label
+            or "k2o" in label
+            or "potass" in label
+        ):
             k_kg_ha = value
-    
-    return {"N_kg_ha": n_kg_ha, "P_kg_ha": p_kg_ha, "K_kg_ha": k_kg_ha}
+            continue
+
+    if n_kg_ha is None and p_kg_ha is None and k_kg_ha is None:
+        raise UpstreamResponseError(
+            "Could not parse NPK recommendation values from Fertimap calculator response."
+        )
+
+    return {
+        "N_kg_ha": n_kg_ha,
+        "P_kg_ha": p_kg_ha,
+        "K_kg_ha": k_kg_ha,
+    }
