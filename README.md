@@ -1,7 +1,7 @@
 <h1 align="center">fertimap</h1>
 
 <p align="center">
-  <strong>A Python client for site-specific NPK fertilizer recommendations from [fertimap.ma](http://www.fertimap.ma/)</strong>
+  <strong>A Python client for site-specific NPK fertilizer recommendations from <a href="http://www.fertimap.ma/">fertimap.ma</a></strong>
 </p>
 
 <p align="center">
